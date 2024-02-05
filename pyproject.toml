@@ -60,7 +60,7 @@ target-version = "py310"
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 select = ["ALL"]
-ignore = ["ANN", "D", "T20", "DTZ"]
+ignore = ["ANN", "D", "T20", "DTZ", "COM812", "ISC001"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
