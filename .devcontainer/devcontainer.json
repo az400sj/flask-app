@@ -12,11 +12,23 @@
   "customizations": {
     "vscode": {
       "extensions": [
-		"ms-python.python",
-		"mhutchie.git-graph",
-		"mutantdino.resourcemonitor"
-	],
-      "settings": {}
+        "ms-python.python",
+        "mhutchie.git-graph",
+        "mutantdino.resourcemonitor",
+        "charliermarsh.ruff",
+        "tamasfe.even-better-toml"
+      ],
+      "settings": {
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.fixAll": true,
+            "source.organizeImports": true
+          }
+        },
+        "editor.formatOnSave": true
+      }
     }
   }
 }
