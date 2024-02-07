@@ -24,7 +24,9 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
     serverFarmId: appServicePlan.id
     siteConfig: {
       linuxFxVersion: linuxFxVersion
-      appCommandLine: 'flask run -p 80'
+      appCommandLine: 'gunicorn --bind=0.0.0.0 --timeout 600 main:app'
     }
   }
 }
+
+output webAppNameOut string = webAppName
