@@ -63,7 +63,8 @@ stages:
     dependsOn: CI
     condition: succeeded()
     jobs:
-      - deployment: Deploy
+      - deployment: DeployDev
+        displayName: "Dev deployment"
         pool:
           vmImage: "ubuntu-latest"
         environment: dev
@@ -81,7 +82,8 @@ stages:
     dependsOn: Dev
     condition: succeeded()
     jobs:
-      - deployment: Deploy
+      - deployment: DeployUat
+        displayName: "Uat deployment"
         pool:
           vmImage: "ubuntu-latest"
         environment: uat
