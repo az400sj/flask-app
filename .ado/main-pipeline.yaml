@@ -92,5 +92,5 @@ stages:
                   inputs:
                     azureSubscription: $(azureServiceConnection)
                     appType: "webAppLinux"
-                    appName: "$(webAppName)"
+                    appName: "wapp-$(webAppName)" # TODO: parse from bicep deployment output
                     package: "$(Pipeline.Workspace)/zippedApp/*.zip"
