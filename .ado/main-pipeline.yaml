@@ -10,7 +10,6 @@ trigger:
 variables:
   pythonVersion: 3.10
   azureServiceConnection: azure-devops-sp-arm
-  resourceGroupName: dev-rg
   location: westeurope
   webAppName: az400sjtrain
 
@@ -71,26 +70,24 @@ stages:
         strategy:
           runOnce:
             deploy:
-              steps:
-                - checkout: self
-                  displayName: "Checkout repo source code"
-                - task: AzureCLI@2
-                  displayName: "Deploy cloud resources"
-                  inputs:
-                    azureSubscription: $(azureServiceConnection)
-                    scriptType: bash
-                    scriptLocation: inlineScript
-                    useGlobalConfig: false
-                    inlineScript: |
-                      az group create --name $(resourceGroupName) --location $(location)
-                      az deployment group create --resource-group $(resourceGroupName) --template-file .azure/bicep/main.bicep --parameters webAppName=$(webAppName)
-                - download: current
-                  displayName: "Download zipped app code"
-                  artifact: zippedApp
-                - task: AzureWebApp@1
-                  displayName: "Deploy app code to WebApp"
-                  inputs:
-                    azureSubscription: $(azureServiceConnection)
-                    appType: "webAppLinux"
-                    appName: "wapp-$(webAppName)" # TODO: parse from bicep deployment output
-                    package: "$(Pipeline.Workspace)/zippedApp/*.zip"
+              - template: deployment-template.yaml
+                parameters:
+                  resourceGroupName: dev-rg
+                  appName: dev-$(webAppName)
+
+  - stage: "Uat"
+    displayName: "Uat deployment"
+    dependsOn: Dev
+    condition: succeeded()
+    jobs:
+      - deployment: Deploy
+        pool:
+          vmImage: "ubuntu-latest"
+        environment: uat
+        strategy:
+          runOnce:
+            deploy:
+              - template: deployment-template.yaml
+                parameters:
+                  resourceGroupName: uat-rg
+                  appName: uat-$(webAppName)
