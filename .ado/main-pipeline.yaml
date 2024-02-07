@@ -62,6 +62,8 @@ stages:
     displayName: "Dev deployment"
     dependsOn: CI
     condition: succeeded()
+    variables:
+      - group: dev-flask
     jobs:
       - deployment: DeployDev
         displayName: "Dev deployment"
@@ -74,13 +76,15 @@ stages:
               steps:
                 - template: deployment-template.yaml
                   parameters:
-                    resourceGroupName: dev-rg
+                    resourceGroupName: $(resourceGroupName)
                     appName: dev-$(webAppName)
 
   - stage: "Uat"
     displayName: "Uat deployment"
     dependsOn: Dev
     condition: succeeded()
+    variables:
+      - group: uat-flask
     jobs:
       - deployment: DeployUat
         displayName: "Uat deployment"
@@ -93,5 +97,5 @@ stages:
               steps:
                 - template: deployment-template.yaml
                   parameters:
-                    resourceGroupName: uat-rg
+                    resourceGroupName: $(resourceGroupName)
                     appName: uat-$(webAppName)
