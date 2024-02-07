@@ -29,6 +29,12 @@ jobs:
       - script: |
           poetry install
         displayName: "Install python dependencies"
+
+      - script: |
+          ruff check
+          ruff format --check
+        displayName: "Run linter and formatter checks"
+
       - script: |
           poetry run pytest --junitxml=junit/test-results.xml
         displayName: "Run pytest"
