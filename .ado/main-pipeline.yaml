@@ -92,5 +92,5 @@ stages:
                   inputs:
                     azureSubscription: $(azureServiceConnection)
                     appType: "webAppLinux"
-                    appName: "$(WebAppNameDev)"
+                    appName: "$(webAppName)"
                     package: "$(Pipeline.Workspace)/zippedApp/*.zip"
