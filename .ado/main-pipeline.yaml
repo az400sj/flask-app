@@ -60,7 +60,7 @@ stages:
             artifact: zippedApp
 
   - stage: "Dev"
-    displayName: "Deploy do dev environment"
+    displayName: "Dev deployment"
     dependsOn: CI
     condition: succeeded()
     jobs:
