@@ -19,7 +19,7 @@ stages:
               versionSpec: $(pythonVersion)
 
           - script: |
-              pipx install poetry
+              pip install poetry
             displayName: "Install poetry"
 
           - script: |
