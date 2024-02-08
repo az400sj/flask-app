@@ -17,7 +17,8 @@
         "mutantdino.resourcemonitor",
         "charliermarsh.ruff",
         "tamasfe.even-better-toml",
-        "redhat.vscode-yaml"
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-bicep"
       ],
       "settings": {
         "[python]": {

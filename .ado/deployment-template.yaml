@@ -1,0 +1,29 @@
+parameters:
+  - name: resourceGroupName
+    type: string
+  - name: appName
+    type: string
+
+steps:
+  - checkout: self
+    displayName: "Checkout repo source code"
+  - task: AzureCLI@2
+    displayName: "Deploy cloud resources"
+    inputs:
+      azureSubscription: $(azureServiceConnection)
+      scriptType: bash
+      scriptLocation: inlineScript
+      useGlobalConfig: false
+      inlineScript: |
+        az group create --name ${{ parameters.resourceGroupName }} --location $(location)
+        az deployment group create --resource-group ${{ parameters.resourceGroupName }} --template-file .azure/bicep/main.bicep --parameters webAppName=${{ parameters.appName }}
+  - download: current
+    displayName: "Download zipped app code"
+    artifact: zippedApp
+  - task: AzureWebApp@1
+    displayName: "Deploy app code to WebApp"
+    inputs:
+      azureSubscription: $(azureServiceConnection)
+      appType: "webAppLinux"
+      appName: ${{ parameters.appName }}
+      package: "$(Pipeline.Workspace)/zippedApp/*.zip"
