@@ -1,0 +1,105 @@
+trigger: none
+
+variables:
+  pythonVersion: 3.10
+  azureServiceConnection: azure-devops-sp-arm
+  location: westeurope
+  webAppName: az400sjtrain
+
+stages:
+  - stage: "CI"
+    jobs:
+      - job: "Build"
+        displayName: "CI - build and test"
+        pool: LocalPool
+        steps:
+          - task: UsePythonVersion@0
+            displayName: "Install python"
+            inputs:
+              versionSpec: $(pythonVersion)
+
+          - script: |
+              pipx install poetry
+            displayName: "Install poetry"
+
+          - script: |
+              poetry install
+            displayName: "Install python dependencies"
+
+          - script: |
+              poetry run ruff check
+              poetry run ruff format --check
+            displayName: "Run linter and formatter checks"
+
+          - task: SonarQubePrepare@5
+            inputs:
+              SonarQube: "localSonarQube"
+              scannerMode: "CLI"
+              configMode: "manual"
+              cliProjectKey: "az400"
+              cliProjectName: "az400"
+              cliSources: "src"
+          - task: SonarQubeAnalyze@5
+            inputs:
+              jdkversion: "JAVA_HOME_11_X64"
+          - task: SonarQubePublish@5
+            inputs:
+              pollingTimeoutSec: "300"
+
+          - script: |
+              poetry run pytest --junitxml=junit/test-results.xml
+            displayName: "Run pytest"
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: "**/test-*.xml"
+              testRunTitle: "Publish test results"
+
+          - script: |
+              poetry export -f requirements.txt --output requirements.txt
+              zip -r $(Build.ArtifactStagingDirectory)/app.zip src/ static/ templates/ main.py requirements.txt
+            displayName: "Build app"
+
+          - publish: "$(Build.ArtifactStagingDirectory)"
+            artifact: zippedApp
+
+  - stage: "Dev"
+    displayName: "Dev deployment"
+    dependsOn: CI
+    condition: succeeded()
+    variables:
+      - group: dev-flask
+    jobs:
+      - deployment: DeployDev
+        displayName: "Dev deployment"
+        pool: LocalPool
+        environment: dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: deployment-template.yaml
+                  parameters:
+                    resourceGroupName: $(resourceGroupName)
+                    appName: dev-$(webAppName)
+
+  - stage: "Uat"
+    displayName: "Uat deployment"
+    dependsOn: Dev
+    condition: succeeded()
+    variables:
+      - group: uat-flask
+    jobs:
+      - deployment: DeployUat
+        displayName: "Uat deployment"
+        pool: LocalPool
+        environment: uat
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: deployment-template.yaml
+                  parameters:
+                    resourceGroupName: $(resourceGroupName)
+                    appName: uat-$(webAppName)
