@@ -6,6 +6,7 @@ trigger:
     exclude:
       - .devcontainer
       - README.md
+pr: none
 
 variables:
   pythonVersion: 3.10
