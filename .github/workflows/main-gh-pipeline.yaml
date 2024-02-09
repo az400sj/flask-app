@@ -1,6 +1,9 @@
 on:
   workflow_dispatch:
 
+env:
+  PYTHON_VERSION: "3.10"
+
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
@@ -8,5 +11,44 @@ jobs:
       - uses: actions/checkout@v4
         name: Checkout repo code
 
+      - uses: actions/setup-python@v4
+        name: Install python
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
       - run: |
-          echo "Hello there!"
+          pipx install poetry
+        name: "Install poetry"
+
+      - run: |
+          poetry install
+        name: "Install python dependencies"
+
+      - run: |
+          poetry run ruff check
+          poetry run ruff format --check
+        name: "Run linter and formatter checks"
+
+      - run: |
+          poetry run pytest --junitxml=junit/test-results.xml
+        name: "Run pytest"
+
+      - uses: actions/upload-artifact@v4
+        name: Upload pytest test results
+        with:
+          name: pytest-results
+          path: junit/test-results.xml
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+
+      - run: |
+          poetry export -f requirements.txt --output requirements.txt
+          mkdir package
+          zip -r package/app.zip src/ static/ templates/ main.py requirements.txt
+        name: "Build app"
+
+      - uses: actions/upload-artifact@v4
+        name: Upload app artifact
+        with:
+          name: zippedApp
+          path: package/app.zip
