@@ -7,6 +7,10 @@ env:
   LOCATION: "westeurope"
   WEB_APP_NAME: "az400sjtrain"
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
