@@ -84,17 +84,13 @@ jobs:
         name: Upload app artifact
         with:
           name: zippedApp
-          path: package/app.zip
-
-      # for debug
-      - run: |
-          ls package
+          path: .
 
       - uses: azure/webapps-deploy@v3
         name: "Deploy app code to WebApp"
         with:
           app-name: dev-${{ env.WEB_APP_NAME }}
-          package: "package/*.zip"
+          package: "*.zip"
           type: ZIP
 
       - name: Azure CLI logout
