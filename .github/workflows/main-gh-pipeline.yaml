@@ -86,6 +86,10 @@ jobs:
           name: zippedApp
           path: package/app.zip
 
+      # for debug
+      - run: |
+          ls package
+
       - uses: azure/webapps-deploy@v3
         name: "Deploy app code to WebApp"
         with:
