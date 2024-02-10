@@ -91,6 +91,7 @@ jobs:
         with:
           app-name: dev-${{ env.WEB_APP_NAME }}
           package: "package/*.zip"
+          type: ZIP
 
       - name: Azure CLI logout
         run: |
