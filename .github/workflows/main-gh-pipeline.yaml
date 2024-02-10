@@ -78,7 +78,7 @@ jobs:
       - name: Deploy cloud resources
         run: |
           az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
-          az deployment group create --resource-group $RESOURCE_GROUP_NAME --template-file .azure/bicep/main.bicep --parameters webAppName=$WEB_APP_NAME
+          az deployment group create --resource-group $RESOURCE_GROUP_NAME --template-file .azure/bicep/main.bicep --parameters webAppName="dev-$WEB_APP_NAME"
 
       - uses: actions/download-artifact@v4
         name: Upload app artifact
