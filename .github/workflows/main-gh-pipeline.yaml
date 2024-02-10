@@ -3,6 +3,13 @@ on:
 
 env:
   PYTHON_VERSION: "3.10"
+  RESOURCE_GROUP_NAME: "dev-rg"
+  LOCATION: "westeurope"
+  WEB_APP_NAME: "az400sjtrain"
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   build_and_test:
@@ -52,3 +59,42 @@ jobs:
         with:
           name: zippedApp
           path: package/app.zip
+
+  dev_deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    needs: build_and_test
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout repo code
+
+      - uses: azure/login@v1
+        name: Az CLI login
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy cloud resources
+        run: |
+          az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
+          az deployment group create --resource-group $RESOURCE_GROUP_NAME --template-file .azure/bicep/main.bicep --parameters webAppName="dev-$WEB_APP_NAME"
+
+      - uses: actions/download-artifact@v4
+        name: Upload app artifact
+        with:
+          name: zippedApp
+          path: .
+
+      - uses: azure/webapps-deploy@v3
+        name: "Deploy app code to WebApp"
+        with:
+          app-name: dev-${{ env.WEB_APP_NAME }}
+          package: "*.zip"
+          type: ZIP
+
+      - name: Azure CLI logout
+        run: |
+          az logout
+          az cache purge
+          az account clear
